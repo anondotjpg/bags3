@@ -87,7 +87,7 @@ const MARQUEE_TOKENS: MarqueeToken[] = [
     name: "Natecoin",
     symbol: "NATE",
     tokenImage: "/t4.webp",
-    feeEarnerUsername: "Nate_Esparza",
+    feeEarnerUsername: "NATE_Esparza",
     feeEarnerAvatar: "/c4.webp",
     earningsDisplay: "$18,309",
     holdersDisplay: "430",
@@ -378,32 +378,35 @@ export default function Home() {
         <div className="relative z-30 mt-10 w-full max-w-5xl">
           <div
             className="
-              mx-auto flex flex-col items-center justify-between gap-4
+              relative
+              mx-auto flex flex-col items-center justify-between gap-6
               rounded-[28px] border border-white/5
               bg-[#0c0c0f]
               px-6 py-8
-              md:flex-row md:px-8 md:py-5
+              md:flex-row md:items-start md:gap-10 md:px-10 md:py-7 md:pb-8
             "
           >
-            <div className="flex items-center gap-4">
+            {/* LEFT SIDE – text column */}
+            <div className="flex w-full items-center gap-4 md:flex-1 md:items-start md:gap-5">
               {/* Icon background box since b.png is transparent */}
               <div
                 className="
                   flex h-14 w-14 items-center justify-center
                   rounded-2xl bg-black/90
+                  md:h-16 md:w-16
                 "
               >
                 <Image
                   src="/b.png"
                   alt="Bags Mobile icon"
-                  width={40}
-                  height={40}
-                  className="h-9 w-9"
+                  width={48}
+                  height={48}
+                  className="h-10 w-10 md:h-11 md:w-11"
                 />
               </div>
 
               <div className="text-left">
-                <p className="text-sm font-semibold text-white md:text-base">
+                <p className="text-sm font-semibold text-white md:text-lg">
                   Bags Mobile
                 </p>
                 {/* Mobile: static "future" */}
@@ -411,7 +414,7 @@ export default function Home() {
                   Get funded for your future
                 </p>
                 {/* md+ : rotating word */}
-                <p className="hidden text-xs text-neutral-300 md:block md:text-sm">
+                <p className="hidden text-xs text-neutral-300 md:block md:text-sm lg:text-base">
                   Get funded for your <RotatingWord />
                 </p>
                 <p className="mt-0.5 text-[11px] text-neutral-500 md:text-xs">
@@ -420,17 +423,34 @@ export default function Home() {
               </div>
             </div>
 
-            {/* download – same green, just alpha-tinted on hover */}
+            {/* RIGHT SIDE – QR only on lg+ */}
+            <div className="flex w-full justify-center md:w-auto md:justify-end">
+              <a
+                href="https://apps.apple.com/us/app/bags-trade-crypto-memes/id6473196333"
+                className="hidden lg:block"
+              >
+                <Image
+                  src="/bags-ios-qr.png"
+                  alt="Scan to download Bags on iOS"
+                  width={120}
+                  height={120}
+                  className="rounded-md border border-white/10"
+                />
+              </a>
+            </div>
+
+            {/* download – mobile: normal flow; md+: bottom-left of panel */}
             <a
               href="https://bags.fm/app-links"
               className="
-                inline-flex shrink-0 items-center justify-center
+                mt-3 inline-flex shrink-0 items-center justify-center
                 rounded-full bg-[#02FF40]/100
                 hover:bg-[#02FF40]/90
                 px-7 py-2.5
                 text-sm font-semibold text-black
                 shadow-[0_0_25px_rgba(0,255,90,0.1)]
                 transition-colors duration-150
+                md:absolute md:bottom-5 md:left-6 md:mt-0
               "
             >
               download now
