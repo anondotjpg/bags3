@@ -211,7 +211,7 @@ export default function Home() {
       </header>
 
       {/* HERO */}
-      <section className="relative flex items-center justify-center px-6 py-16 overflow-hidden">
+      <section className="relative flex items-center justify-center px-6 py-32 overflow-hidden">
         {/* Dotted map background at bottom */}
         <div
           className="
@@ -225,7 +225,7 @@ export default function Home() {
           <DottedMap className="w-full h-full" dotRadius={0.15} />
         </div>
 
-        <div className="max-w-3xl text-center z-10">
+        <div className="max-w-3xl text-center z-10 -mt-16">
           {/* Earnings pill */}
           <div className="inline-flex items-center rounded-full bg-[rgba(0,0,0,0.9)] border border-white/10 px-5 py-2 mb-5 shadow-lg backdrop-blur-sm">
             <span
@@ -283,7 +283,7 @@ export default function Home() {
       </section>
 
       {/* iPhone mockup under hero */}
-      <section className="relative flex flex-col items-center px-6 pb-16 overflow-hidden">
+      <section className="relative flex flex-col items-center px-6 pb-16 overflow-hidden -mt-16">
         <p className="mb-4 text-xs tracking-wider text-neutral-700">
           you are clicks away from this
         </p>
