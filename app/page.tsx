@@ -214,18 +214,17 @@ export default function Home() {
               <span className="font-bold">create</span>
             </a>
 
-            {/* log in */}
+            {/* log in – white button with subtle tint via opacity */}
             <a
               href="https://bags.fm/login"
               className="
                 inline-flex items-center justify-center
-                rounded-full bg-white
+                rounded-full bg-white/100
+                hover:bg-white/90
                 px-7 py-2.5
                 text-sm text-black
                 transform will-change-transform
-                transition-transform duration-150 ease-in-out
-                transition-colors
-                hover:bg-neutral-100
+                transition-colors duration-150
                 font-bold
                 cursor-pointer
               "
@@ -416,16 +415,17 @@ export default function Home() {
               </div>
             </div>
 
+            {/* download – same green, just alpha-tinted on hover */}
             <a
               href="https://bags.fm/app-links"
               className="
                 inline-flex shrink-0 items-center justify-center
-                rounded-full bg-[#02FF40]
+                rounded-full bg-[#02FF40]/100
+                hover:bg-[#02FF40]/90
                 px-7 py-2.5
                 text-sm font-semibold text-black
                 shadow-[0_0_25px_rgba(0,255,90,0.1)]
-                transition-colors
-                hover:bg-[#39ff6b]
+                transition-colors duration-150
               "
             >
               download now
