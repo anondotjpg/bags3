@@ -35,6 +35,21 @@ const EARNINGS_START = 21_000_000;
 // words to loop through where {variable} was
 const VARIABLE_WORDS = ["project", "business", "app", "cause", "anything"];
 
+// 🔹 Small component that only re-renders itself when the word changes
+function RotatingWord() {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % VARIABLE_WORDS.length);
+    }, 1500); // change word every 1.5s
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return <span>{VARIABLE_WORDS[index]}</span>;
+}
+
 // 🔹 Marquee token JSON you can customize
 const MARQUEE_TOKENS: MarqueeToken[] = [
   {
@@ -93,8 +108,6 @@ export default function Home() {
   const earningsSpanRef = useRef<HTMLSpanElement | null>(null);
   const earningsValueRef = useRef<number>(EARNINGS_START);
 
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
-
   // Update earnings without causing React re-renders
   useEffect(() => {
     const node = earningsSpanRef.current;
@@ -110,17 +123,6 @@ export default function Home() {
 
     return () => clearInterval(interval);
   }, []);
-
-  // Rotate the {variable} word
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentWordIndex((prev) => (prev + 1) % VARIABLE_WORDS.length);
-    }, 1500); // change word every 1.5s
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const currentWord = VARIABLE_WORDS[currentWordIndex];
 
   return (
     <main className="min-h-screen bg-[#050507] text-white">
@@ -404,7 +406,7 @@ export default function Home() {
                   Bags Mobile
                 </p>
                 <p className="text-xs text-neutral-300 md:text-sm">
-                  Get funded for your {currentWord}
+                  Get funded for your <RotatingWord />
                 </p>
                 <p className="mt-0.5 text-[11px] text-neutral-500 md:text-xs">
                   Available on iOS and Android
