@@ -219,7 +219,7 @@ export default function Home() {
             absolute inset-x-0 bottom-0
             z-0
             opacity-20
-            transform-gpu translate-y-10
+            transform-gpu translate-y-15
           "
         >
           <DottedMap className="w-full h-full" dotRadius={0.15} />
