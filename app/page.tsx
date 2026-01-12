@@ -148,7 +148,8 @@ export default function Home() {
 
           <nav className="hidden items-center gap-5 text-sm md:flex">
             {/* [$100K challenge] */}
-            <div
+            <a
+              href="https://bags.fm/drops"
               className="
                 flex items-center gap-1 text-[14px]
                 text-neutral-300
@@ -158,11 +159,11 @@ export default function Home() {
               "
             >
               <span>[$100K challenge]</span>
-            </div>
+            </a>
 
             {/* [how it works] */}
-            <button
-              type="button"
+            <a
+              href="https://bags.fm/how-it-works"
               className="
                 text-[14px]
                 text-neutral-300
@@ -172,14 +173,14 @@ export default function Home() {
               "
             >
               <span>[how it works]</span>
-            </button>
+            </a>
           </nav>
 
           {/* Right buttons */}
           <div className="flex items-center gap-2.5">
             {/* create */}
-            <button
-              type="button"
+            <a
+              href="https://bags.fm/launch"
               className="
                 hidden md:inline-flex items-center justify-center
                 rounded-full bg-[#02FF40]
@@ -193,11 +194,11 @@ export default function Home() {
             >
               <FiPlus className="mr-2 text-[19px]" />
               <span className="font-bold">create</span>
-            </button>
+            </a>
 
             {/* log in */}
-            <button
-              type="button"
+            <a
+              href="https://bags.fm/login"
               className="
                 inline-flex items-center justify-center
                 rounded-full bg-white
@@ -210,7 +211,7 @@ export default function Home() {
               "
             >
               <span>log in</span>
-            </button>
+            </a>
           </div>
         </div>
       </header>
@@ -256,8 +257,8 @@ export default function Home() {
           </p>
 
           {/* CTA button - Shiny Version */}
-          <motion.button
-            type="button"
+          <motion.a
+            href="https://bags.fm/launch"
             className="
               relative mt-8 inline-flex items-center justify-center
               rounded-full bg-[#02FF40]
@@ -283,7 +284,7 @@ export default function Home() {
             />
             <FiPlus className="relative mr-2 text-3xl" />
             <span className="relative font-bold">get funded</span>
-          </motion.button>
+          </motion.a>
         </div>
       </section>
 
