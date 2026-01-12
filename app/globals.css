@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+/* 1️⃣ Register OpenRunde font files */
+@font-face {
+  font-family: "Open Runde";
+  src: url("/fonts/OpenRunde-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Open Runde";
+  src: url("/fonts/OpenRunde-Medium.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Open Runde";
+  src: url("/fonts/OpenRunde-Semibold.woff") format("woff");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Open Runde";
+  src: url("/fonts/OpenRunde-Bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  /* Use OpenRunde as primary UI font */
+  --font-open-runde: "Open Runde", -apple-system, BlinkMacSystemFont,
+    system-ui, sans-serif;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  /* Tailwind `font-sans` → OpenRunde */
+  --font-sans: var(--font-open-runde);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-open-runde);
+}
+
+/* Optional utility if you want to force OpenRunde somewhere */
+.font-open {
+  font-family: var(--font-open-runde);
+}
