@@ -507,12 +507,8 @@ export default function Home() {
           <Marquee3D />
         </div>
 
-        {/* Bags Mobile banner – MagicCard wrapper, original styling inside */}
         <div className="relative z-30 mt-10 w-full max-w-5xl">
-          <MagicCard
-            gradientColor="#02FF40"
-            className="relative mx-auto w-full rounded-[28px] border border-white/5 bg-[#0c0c0f] p-0"
-          >
+          <MagicCard className="mx-auto w-full">
             <div
               className="
                 flex w-full flex-col items-center justify-between gap-2
@@ -522,14 +518,7 @@ export default function Home() {
             >
               {/* LEFT SIDE – text column */}
               <div className="flex w-full items-center gap-4 md:flex-1 md:items-start md:gap-5">
-                {/* Icon background box since b.png is transparent */}
-                <div
-                  className="
-                    flex h-14 w-14 items-center justify-center
-                    rounded-2xl bg-black/90
-                    md:h-16 md:w-16
-                  "
-                >
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-black/90 md:h-16 md:w-16">
                   <Image
                     src="/b.png"
                     alt="Bags Mobile icon"
@@ -543,11 +532,9 @@ export default function Home() {
                   <p className="text-sm font-semibold text-white md:text-lg">
                     Bags Mobile
                   </p>
-                  {/* Mobile: static "future" */}
                   <p className="text-xs text-neutral-300 md:hidden">
                     Get funded for your future
                   </p>
-                  {/* md+ : rotating word */}
                   <p className="hidden text-xs text-neutral-300 md:block md:text-sm lg:text-base">
                     Get funded for your <RotatingWord />
                   </p>
@@ -557,7 +544,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* RIGHT SIDE – QR only on lg+ */}
+              {/* RIGHT SIDE – QR */}
               <div className="flex w-full justify-center md:w-auto md:justify-end">
                 <a
                   href="https://apps.apple.com/us/app/bags-trade-crypto-memes/id6473196333"
@@ -573,13 +560,12 @@ export default function Home() {
                 </a>
               </div>
 
-              {/* download – mobile: normal flow; md+: bottom-left of panel */}
+              {/* download btn */}
               <a
                 href="https://bags.fm/app-links"
                 className="
                   mt-1 inline-flex shrink-0 items-center justify-center
-                  rounded-full bg-[#02FF40]/100
-                  hover:bg-[#02FF40]/90
+                  rounded-full bg-[#02FF40]/100 hover:bg-[#02FF40]/90
                   px-7 py-2.5
                   text-sm font-semibold text-black
                   shadow-[0_0_25px_rgba(0,255,90,0.1)]
