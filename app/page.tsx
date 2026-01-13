@@ -11,6 +11,7 @@ import { MarqueeCard, MarqueeToken } from "./components/MarqueeCard";
 import { AvatarCircles } from "./components/Avatar";
 import { cn } from "@/lib/utils";
 import { Marqueee } from "./components/Marq";
+import { MagicCard } from "./components/MagicCard";
 
 const shinyAnimationProps: MotionProps = {
   initial: { "--x": "100%" },
@@ -506,88 +507,90 @@ export default function Home() {
           <Marquee3D />
         </div>
 
-        {/* Bags Mobile banner */}
+        {/* Bags Mobile banner – MagicCard wrapper, original styling inside */}
         <div className="relative z-30 mt-10 w-full max-w-5xl">
-          <div
-            className="
-              relative
-              mx-auto flex flex-col items-center justify-between gap-2
-              rounded-[28px] border border-white/5
-              bg-[#0c0c0f]
-              px-6 py-4
-              md:flex-row md:items-start md:gap-10 md:px-10 md:py-7 md:pb-8
-            "
+          <MagicCard
+            gradientColor="#02FF40"
+            className="relative mx-auto w-full rounded-[28px] border border-white/5 bg-[#0c0c0f] p-0"
           >
-            {/* LEFT SIDE – text column */}
-            <div className="flex w-full items-center gap-4 md:flex-1 md:items-start md:gap-5">
-              {/* Icon background box since b.png is transparent */}
-              <div
-                className="
-                  flex h-14 w-14 items-center justify-center
-                  rounded-2xl bg-black/90
-                  md:h-16 md:w-16
-                "
-              >
-                <Image
-                  src="/b.png"
-                  alt="Bags Mobile icon"
-                  width={48}
-                  height={48}
-                  className="h-10 w-10 md:h-11 md:w-11"
-                />
-              </div>
-
-              <div className="text-left">
-                <p className="text-sm font-semibold text-white md:text-lg">
-                  Bags Mobile
-                </p>
-                {/* Mobile: static "future" */}
-                <p className="text-xs text-neutral-300 md:hidden">
-                  Get funded for your future
-                </p>
-                {/* md+ : rotating word */}
-                <p className="hidden text-xs text-neutral-300 md:block md:text-sm lg:text-base">
-                  Get funded for your <RotatingWord />
-                </p>
-                <p className="mt-0.5 text-[11px] text-neutral-500 md:text-xs">
-                  Available on iOS and Android
-                </p>
-              </div>
-            </div>
-
-            {/* RIGHT SIDE – QR only on lg+ */}
-            <div className="flex w-full justify-center md:w-auto md:justify-end">
-              <a
-                href="https://apps.apple.com/us/app/bags-trade-crypto-memes/id6473196333"
-                className="hidden lg:block"
-              >
-                <Image
-                  src="/bags-ios-qr.png"
-                  alt="Scan to download Bags on iOS"
-                  width={120}
-                  height={120}
-                  className="rounded-md border border-white/10"
-                />
-              </a>
-            </div>
-
-            {/* download – mobile: normal flow; md+: bottom-left of panel */}
-            <a
-              href="https://bags.fm/app-links"
+            <div
               className="
-                mt-1 inline-flex shrink-0 items-center justify-center
-                rounded-full bg-[#02FF40]/100
-                hover:bg-[#02FF40]/90
-                px-7 py-2.5
-                text-sm font-semibold text-black
-                shadow-[0_0_25px_rgba(0,255,90,0.1)]
-                transition-colors duration-150
-                lg:absolute lg:bottom-5 lg:left-6 lg:mt-0
+                flex w-full flex-col items-center justify-between gap-2
+                px-6 py-4
+                md:flex-row md:items-start md:gap-10 md:px-10 md:py-7 md:pb-8
               "
             >
-              download now
-            </a>
-          </div>
+              {/* LEFT SIDE – text column */}
+              <div className="flex w-full items-center gap-4 md:flex-1 md:items-start md:gap-5">
+                {/* Icon background box since b.png is transparent */}
+                <div
+                  className="
+                    flex h-14 w-14 items-center justify-center
+                    rounded-2xl bg-black/90
+                    md:h-16 md:w-16
+                  "
+                >
+                  <Image
+                    src="/b.png"
+                    alt="Bags Mobile icon"
+                    width={48}
+                    height={48}
+                    className="h-10 w-10 md:h-11 md:w-11"
+                  />
+                </div>
+
+                <div className="text-left">
+                  <p className="text-sm font-semibold text-white md:text-lg">
+                    Bags Mobile
+                  </p>
+                  {/* Mobile: static "future" */}
+                  <p className="text-xs text-neutral-300 md:hidden">
+                    Get funded for your future
+                  </p>
+                  {/* md+ : rotating word */}
+                  <p className="hidden text-xs text-neutral-300 md:block md:text-sm lg:text-base">
+                    Get funded for your <RotatingWord />
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-neutral-500 md:text-xs">
+                    Available on iOS and Android
+                  </p>
+                </div>
+              </div>
+
+              {/* RIGHT SIDE – QR only on lg+ */}
+              <div className="flex w-full justify-center md:w-auto md:justify-end">
+                <a
+                  href="https://apps.apple.com/us/app/bags-trade-crypto-memes/id6473196333"
+                  className="hidden lg:block"
+                >
+                  <Image
+                    src="/bags-ios-qr.png"
+                    alt="Scan to download Bags on iOS"
+                    width={120}
+                    height={120}
+                    className="rounded-md border border-white/10"
+                  />
+                </a>
+              </div>
+
+              {/* download – mobile: normal flow; md+: bottom-left of panel */}
+              <a
+                href="https://bags.fm/app-links"
+                className="
+                  mt-1 inline-flex shrink-0 items-center justify-center
+                  rounded-full bg-[#02FF40]/100
+                  hover:bg-[#02FF40]/90
+                  px-7 py-2.5
+                  text-sm font-semibold text-black
+                  shadow-[0_0_25px_rgba(0,255,90,0.1)]
+                  transition-colors duration-150
+                  lg:absolute lg:bottom-5 lg:left-6 lg:mt-0
+                "
+              >
+                download now
+              </a>
+            </div>
+          </MagicCard>
         </div>
       </section>
     </main>
