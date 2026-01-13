@@ -12,6 +12,7 @@ import { AvatarCircles } from "./components/Avatar";
 import { cn } from "@/lib/utils";
 import { Marqueee } from "./components/Marq";
 import { MagicCard } from "./components/MagicCard";
+import DitherShader from "./components/dither-shader";
 
 const shinyAnimationProps: MotionProps = {
   initial: { "--x": "100%" },
@@ -446,10 +447,11 @@ export default function Home() {
             h-56 md:h-100
           "
         >
-          <Image
-            src="/floor.webp"
-            alt=""
-            fill
+          <DitherShader
+            src="floor.webp"
+            gridSize={3}
+            ditherMode="bayer"
+            colorMode="grayscale"
             className="object-cover grayscale"
           />
           {/* dark overlay */}
