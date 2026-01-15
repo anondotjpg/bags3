@@ -463,7 +463,7 @@ export default function Home() {
                   rows={7}
                   cols={7}
                   frames={wave}
-                  fps={20}
+                  fps={5}
                   size={16}
                   gap={3}
                   palette={{

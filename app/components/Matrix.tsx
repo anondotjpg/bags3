@@ -429,7 +429,7 @@ export const Matrix = React.forwardRef<HTMLDivElement, MatrixProps>(
       cols,
       pattern,
       frames,
-      fps = 12,
+      fps = 6,
       autoplay = true,
       loop = true,
       size = 10,
