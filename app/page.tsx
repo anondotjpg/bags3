@@ -16,7 +16,7 @@ import { MagicCard } from "./components/MagicCard";
 import DitherShader from "./components/dither-shader";
 import { BagsBento } from "./components/BagsBento";
 
-// ElevenLabs Matrix + presets
+// ElevenLabs Matrix + presets (your local implementation using useId)
 import { Matrix, digits, wave } from "./components/Matrix";
 
 const shinyAnimationProps: MotionProps = {
@@ -49,6 +49,7 @@ const FUNDED_TODAY_DIGITS = FUNDED_TODAY.toString().split("");
 
 function RotatingWord() {
   const [index, setIndex] = useState(0);
+
   useEffect(() => {
     const interval = setInterval(
       () => setIndex((prev) => (prev + 1) % VARIABLE_WORDS.length),
@@ -56,6 +57,7 @@ function RotatingWord() {
     );
     return () => clearInterval(interval);
   }, []);
+
   return <span>{VARIABLE_WORDS[index]}</span>;
 }
 
@@ -279,7 +281,7 @@ export default function Home() {
             </a>
             <a
               href="https://bags.fm/login"
-              className="inline-flex cursor-pointer items-center justify-center rounded-full bg:white/100 bg-white/100 px-7 py-2.5 text-sm font-bold text-black transition-colors duration-150 hover:bg:white/90 hover:bg-white/90"
+              className="inline-flex cursor-pointer items-center justify-center rounded-full bg-white/100 px-7 py-2.5 text-sm font-bold text-black transition-colors duration-150 hover:bg-white/90"
             >
               <span>log in</span>
             </a>
@@ -414,7 +416,7 @@ export default function Home() {
         {/* Matrix "show off" stats card */}
         <div className="relative z-30 mb-16 w-full max-w-5xl">
           <div className="rounded-3xl px-6 py-6 md:px-8 md:py-7">
-            {/* NOTE: on mobile this is column + centered; md+ it's row + spaced */}
+            {/* mobile: column + centered; md+: row + spaced */}
             <div className="flex flex-col items-center gap-6 md:flex-row md:items-center md:justify-between">
               {/* Copy + digits */}
               <div className="w-full space-y-4 text-center md:max-w-md md:text-left">

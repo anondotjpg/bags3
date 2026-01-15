@@ -1,7 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useId,
+} from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -449,15 +455,11 @@ export const Matrix = React.forwardRef<HTMLDivElement, MatrixProps>(
       onFrame,
     });
 
-    // unique IDs per Matrix so digits & wave don't share gradients
-    const idRef = useRef<string | null>(null);
-    if (!idRef.current) {
-      idRef.current = Math.random().toString(36).slice(2, 9);
-    }
-    const id = idRef.current!;
-    const gradientOnId = `matrix-pixel-on-${id}`;
-    const gradientOffId = `matrix-pixel-off-${id}`;
-    const glowId = `matrix-glow-${id}`;
+    // ✅ Stable, unique per instance, SSR-safe
+    const reactId = useId();
+    const gradientOnId = `${reactId}-on`;
+    const gradientOffId = `${reactId}-off`;
+    const glowId = `${reactId}-glow`;
 
     const currentFrame = useMemo(() => {
       if (mode === "vu" && levels && levels.length > 0) {
