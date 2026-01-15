@@ -437,7 +437,7 @@ export default function Home() {
                 </div>
 
                 <p className="text-xs text-neutral-400 md:text-sm">
-                  People got backed on Bags in the last 24 hours.
+                  People got backed on Bags in the last 24 hours
                 </p>
               </div>
 
