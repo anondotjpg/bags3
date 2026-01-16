@@ -1,67 +1,33 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  memo,
+  type MouseEvent as ReactMouseEvent,
+} from "react";
 import Image from "next/image";
-import { FiPlus, FiSearch } from "react-icons/fi";
+import {
+  FiPlus,
+  FiGlobe,
+  FiPlay,
+  FiPause,
+  FiRewind,
+  FiFastForward,
+} from "react-icons/fi";
 import { motion, type MotionProps } from "motion/react";
 import FastMarquee from "react-fast-marquee";
-
-import { DottedMap } from "./components/DottedMap";
-import { Iphone } from "./components/Iphone";
-import { MarqueeCard, MarqueeToken } from "./components/MarqueeCard";
+import { MarqueeCard, type MarqueeToken } from "./components/MarqCard";
 import { AvatarCircles } from "./components/Avatar";
-import { cn } from "@/lib/utils";
-import { Marqueee } from "./components/Marq";
-import { MagicCard } from "./components/MagicCard";
-import DitherShader from "./components/dither-shader";
-import { BagsBento } from "./components/BagsBento";
 
-// ElevenLabs Matrix + presets (your local implementation using useId)
-import { Matrix, digits, wave } from "./components/Matrix";
-
-const shinyAnimationProps: MotionProps = {
-  initial: { "--x": "100%" },
-  animate: { "--x": "-100%" },
-  whileTap: { scale: 0.97 },
-  transition: {
-    repeat: Infinity,
-    repeatType: "loop",
-    repeatDelay: 1,
-    type: "spring",
-    stiffness: 20,
-    damping: 15,
-    mass: 2,
-    scale: {
-      type: "spring",
-      stiffness: 200,
-      damping: 5,
-      mass: 0.5,
-    },
-  },
-} as MotionProps;
+// ============ CONSTANTS (lazy-loaded where possible) ============
 
 const EARNINGS_START = 21_000_000;
-const VARIABLE_WORDS = ["project", "business", "app", "cause", "anything"];
 
-// 🔢 Daily flex number (only shown via Matrix digits)
-const FUNDED_TODAY = 1284;
-const FUNDED_TODAY_DIGITS = FUNDED_TODAY.toString().split("");
-
-function RotatingWord() {
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(
-      () => setIndex((prev) => (prev + 1) % VARIABLE_WORDS.length),
-      2200,
-    );
-    return () => clearInterval(interval);
-  }, []);
-
-  return <span>{VARIABLE_WORDS[index]}</span>;
-}
-
-const MARQUEE_TOKENS: MarqueeToken[] = [
+// Lazy load heavy data only when needed
+const getMarqueeTokens = (): MarqueeToken[] => [
   {
     id: 1,
     name: "Ralph Wiggum",
@@ -97,7 +63,7 @@ const MARQUEE_TOKENS: MarqueeToken[] = [
     name: "Natecoin",
     symbol: "NATE",
     tokenImage: "/t4.webp",
-    feeEarnerUsername: "Nate_Esparza",
+    feeEarnerUsername: "NATE_Esparza",
     feeEarnerAvatar: "/c4.webp",
     earningsDisplay: "$18,309",
     holdersDisplay: "430",
@@ -114,377 +80,706 @@ const MARQUEE_TOKENS: MarqueeToken[] = [
   },
 ];
 
-const AVATAR_URLS = MARQUEE_TOKENS.map((token) => ({
-  imageUrl: token.feeEarnerAvatar,
-  profileUrl: `https://twitter.com/${token.feeEarnerUsername}`,
-}));
-
-const reviews = [
-  {
-    name: "Jukez",
-    username: "@jukezpilled",
-    body: "I've never seen anything like this before. It's amazing. I love it.",
-    img: "jukez.jpg",
-  },
-  {
-    name: "Elon",
-    username: "@elonmusk",
-    body: "Bags is the best way to raise money online. period.",
-    img: "elon.jpg",
-  },
-  {
-    name: "Finn",
-    username: "@finnbags",
-    body: "We’re funding the future. We're also about to give cracked @jukezpilled a job.",
-    img: "finn.jpg",
-  },
+const NEWS_ITEMS = [
+  "$GAS has broken a $40M market cap on @BagsApp, with $RALPH continuing higher and passing $20M MCAP shortly after.",
+  "The platform continues to see strong momentum in AI-related narratives, with multiple reactions highlighting $GAS and $RALPH as leading examples of effective onboarding to Solana in 2026.",
+  "Claiming earnings is now free on @BagsApp — the team is sponsoring all transaction costs, allowing one-click onboarding without needing SOL in the wallet.",
+  "@finnbags announced ongoing work with founders in DMs to update and scale the onboarding process, noting that things are heating up fast.",
+  "Upcoming features include using fees to pay DEX listings and buy boosts directly on @BagsApp, as teased in recent announcements.",
 ];
 
-const ReviewCard = ({
-  img,
-  name,
-  username,
-  body,
-}: {
-  img: string;
+const TWEET_IDS = [
+  "2012213774225125600",
+  "2012074487760527635",
+  "2012059085743800440",
+  "2012057313549353177",
+  "2012045940115505398",
+  "2012040176152035531",
+  "2012041524473937981",
+];
+
+// ============ TYPES ============
+
+type BagsToken = {
+  mint: string;
   name: string;
-  username: string;
-  body: string;
-}) => (
-  <figure
-    className={cn(
-      "relative h-full w-fit cursor-pointer overflow-hidden rounded-xl border p-4 sm:w-36",
-      "border-gray-950/[.1] bg-gray-950/[.01] hover:bg-gray-950/[.05]",
-      "dark:border-gray-50/[.1] dark:bg-gray-50/[.10] dark:hover:bg-gray-50/[.15]",
-    )}
-  >
-    <div className="flex flex-row items-center gap-2">
-      <img className="rounded-full" width="32" height="32" alt="" src={img} />
-      <div className="flex flex-col">
-        <figcaption className="text-sm font-medium dark:text-white">
-          {name}
-        </figcaption>
-        <p className="text-xs font-medium dark:text-white/40">{username}</p>
+  symbol?: string;
+  image?: string | null;
+  links?: Record<string, string> | null;
+};
+
+// ============ MEMOIZED COMPONENTS ============
+
+const ShinyButton = memo(function ShinyButton() {
+  const shinyAnimationProps: MotionProps = {
+    initial: { "--x": "100%" },
+    animate: { "--x": "-100%" },
+    transition: {
+      repeat: Infinity,
+      repeatType: "loop",
+      repeatDelay: 1,
+      duration: 2.4,
+    },
+  } as MotionProps;
+
+  return (
+    <motion.a
+      href="https://bags.fm/launch"
+      className="relative inline-flex items-center justify-center rounded-full bg-[#02FF40] px-8 py-2.5 -mt-2 text-sm md:text-base font-semibold text-black overflow-hidden transition-transform duration-150 ease-in-out hover:scale-[1.02] active:scale-[0.97]"
+      {...shinyAnimationProps}
+      whileTap={{ scale: 0.96 }}
+    >
+      <span
+        className="pointer-events-none absolute inset-0 rounded-full"
+        style={{
+          backgroundImage:
+            "linear-gradient(-75deg, transparent calc(var(--x) + 20%), rgba(255,255,255,0.5) calc(var(--x) + 25%), transparent calc(var(--x) + 60%))",
+        }}
+      />
+      <FiPlus className="relative mr-2 text-lg md:text-xl" />
+      <span className="relative font-bold">get funded</span>
+    </motion.a>
+  );
+});
+
+const BentoCard = memo(function BentoCard({
+  className,
+  placeholder,
+  children,
+  innerClassName,
+  noPaddingBottom,
+}: {
+  className?: string;
+  placeholder?: string;
+  children?: React.ReactNode;
+  innerClassName?: string;
+  noPaddingBottom?: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-2xl border border-white/10 bg-black/5 backdrop-blur-sm shadow-[0_0_30px_rgba(0,0,0,0.6)] transition-transform transition-shadow duration-300 hover:-translate-y-1 hover:shadow-[0_0_45px_rgba(0,0,0,0.9)] h-full w-full ${className ?? ""}`}
+    >
+      <div
+        className={`flex h-full w-full flex-col px-4 pt-3 ${noPaddingBottom ? "pb-0" : "pb-3"} text-[0.65rem] text-neutral-400 sm:text-xs md:text-sm ${innerClassName ?? ""}`}
+      >
+        {children ?? (
+          <div className="flex h-full w-full items-center justify-center">
+            <span className="opacity-60">{placeholder ?? "[ panel ]"}</span>
+          </div>
+        )}
       </div>
     </div>
-    <blockquote className="mt-2 text-sm">{body}</blockquote>
-  </figure>
-);
-
-export function Marquee3D() {
-  return (
-    <div className="relative flex h-96 w-[75%] flex-row items-center justify-center gap-4 overflow-hidden md:my-32">
-      <Marqueee pauseOnHover vertical className="w-1/4 [--duration:20s]">
-        {reviews.map((review) => (
-          <ReviewCard key={`col1-${review.username}`} {...review} />
-        ))}
-      </Marqueee>
-      <Marqueee
-        reverse
-        pauseOnHover
-        vertical
-        className="w-1/4 [--duration:22s]"
-      >
-        {reviews.map((review) => (
-          <ReviewCard key={`col2-${review.username}`} {...review} />
-        ))}
-      </Marqueee>
-      <Marqueee
-        reverse
-        pauseOnHover
-        vertical
-        className="w-1/4 [--duration:18s]"
-      >
-        {reviews.map((review) => (
-          <ReviewCard key={`col3-${review.username}`} {...review} />
-        ))}
-      </Marqueee>
-      <Marqueee pauseOnHover vertical className="w-1/4 [--duration:24s]">
-        {reviews.map((review) => (
-          <ReviewCard key={`col4-${review.username}`} {...review} />
-        ))}
-      </Marqueee>
-
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-[#050507] to-transparent" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-[#050507] to-transparent" />
-    </div>
   );
-}
+});
 
-export default function Home() {
-  const earningsSpanRef = useRef<HTMLSpanElement | null>(null);
-  const earningsValueRef = useRef<number>(EARNINGS_START);
+// Lazy-loaded video background with IntersectionObserver
+const VideoBackground = memo(function VideoBackground() {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const node = earningsSpanRef.current;
-    if (!node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
 
-    const interval = setInterval(() => {
-      const increment = Math.floor(Math.random() * 401) + 300;
-      earningsValueRef.current += increment;
-      node.textContent = `$${earningsValueRef.current.toLocaleString(
-        "en-US",
-      )}+`;
-    }, 1000);
+    const target = document.getElementById("video-container");
+    if (target) observer.observe(target);
 
-    return () => clearInterval(interval);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (videoRef.current && isVisible) {
+      videoRef.current.playbackRate = .7;
+      videoRef.current.play().catch(() => {});
+    } else if (videoRef.current && !isVisible) {
+      videoRef.current.pause();
+    }
+  }, [isVisible]);
+
+  return (
+    <div id="video-container" className="absolute inset-0">
+      <video
+        ref={videoRef}
+        className="absolute inset-0 h-full w-full object-cover"
+        src="/wall.webm"
+        muted
+        loop
+        playsInline
+        preload="none" // Don't preload - saves memory
+      />
+      <div className="absolute inset-0 bg-black/75" />
+    </div>
+  );
+});
+
+// Optimized Audio Player - only loads audio when interacted with
+const AudioBento = memo(function AudioBento({ className }: { className?: string }) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  const SONG_NAME = "I Get The Bag - Migos";
+
+  const loadAudio = useCallback(() => {
+    if (!isLoaded && audioRef.current) {
+      audioRef.current.load();
+      setIsLoaded(true);
+    }
+  }, [isLoaded]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handlers = {
+      loadedmetadata: () => setDuration(audio.duration || 0),
+      timeupdate: () => setCurrentTime(audio.currentTime || 0),
+      ended: () => {
+        setIsPlaying(false);
+        setCurrentTime(0);
+      },
+    };
+
+    Object.entries(handlers).forEach(([event, handler]) => {
+      audio.addEventListener(event, handler);
+    });
+
+    return () => {
+      Object.entries(handlers).forEach(([event, handler]) => {
+        audio.removeEventListener(event, handler);
+      });
+    };
+  }, []);
+
+  const togglePlay = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    loadAudio();
+
+    if (isPlaying) {
+      audio.pause();
+      setIsPlaying(false);
+    } else {
+      audio.play().then(() => setIsPlaying(true)).catch(console.error);
+    }
+  }, [isPlaying, loadAudio]);
+
+  const seekBy = useCallback((delta: number) => {
+    const audio = audioRef.current;
+    if (!audio || !duration) return;
+    const next = Math.min(Math.max(audio.currentTime + delta, 0), duration);
+    audio.currentTime = next;
+    setCurrentTime(next);
+  }, [duration]);
+
+  const handleScrub = useCallback((e: ReactMouseEvent<HTMLDivElement>) => {
+    const audio = audioRef.current;
+    if (!audio || !duration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const ratio = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
+    audio.currentTime = ratio * duration;
+    setCurrentTime(ratio * duration);
+  }, [duration]);
+
+  const progress = duration ? (currentTime / duration) * 100 : 0;
+
+  const formatTime = (secs: number) => {
+    if (!secs || Number.isNaN(secs)) return "0:00";
+    const minutes = Math.floor(secs / 60);
+    const seconds = Math.floor(secs % 60);
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+
+  return (
+    <BentoCard className={className}>
+      <div className="flex h-full flex-col">
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <span className="text-[0.8rem] font-semibold uppercase tracking-wide text-neutral-300">
+            Player
+          </span>
+          <span className="text-[0.7rem] text-neutral-500">Now playing</span>
+        </div>
+
+        <div className="mb-3 h-px w-full bg-white/10" />
+
+        <div className="flex flex-1 items-center">
+          <div className="flex w-full flex-col items-center gap-4">
+            <div className="w-full truncate text-center text-[0.96rem] font-semibold text-neutral-100">
+              {SONG_NAME}
+            </div>
+
+            <div className="flex items-center justify-center gap-4">
+              <button
+                type="button"
+                onClick={() => seekBy(-10)}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/5 text-neutral-200 transition hover:bg-white/15 hover:border-white/50 active:scale-95"
+              >
+                <FiRewind className="h-5 w-5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={togglePlay}
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/40 bg-white/15 text-white transition hover:bg-white/25 hover:border-white/70 active:scale-95"
+              >
+                {isPlaying ? <FiPause className="h-5 w-5" /> : <FiPlay className="h-5 w-5 translate-x-[1px]" />}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => seekBy(10)}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/5 text-neutral-200 transition hover:bg-white/15 hover:border-white/50 active:scale-95"
+              >
+                <FiFastForward className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="flex w-[80%] flex-col gap-1.5">
+              <div
+                className="relative h-2 w-full cursor-pointer overflow-hidden rounded-full bg-white/10"
+                onClick={handleScrub}
+              >
+                <div
+                  className="absolute inset-y-0 left-0 rounded-full bg-[#02FF40]"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between text-[0.75rem] text-neutral-400">
+                <span className="tabular-nums">{formatTime(currentTime)}</span>
+                <span className="tabular-nums opacity-70">{formatTime(duration)}</span>
+              </div>
+            </div>
+
+            {/* Only set src when needed, use preload="none" */}
+            <audio ref={audioRef} src="/bags.mp3" preload="none" />
+          </div>
+        </div>
+      </div>
+    </BentoCard>
+  );
+});
+
+// Optimized Earnings with requestAnimationFrame instead of setInterval
+const EarningsBento = memo(function EarningsBento({ className }: { className?: string }) {
+  const [earnings, setEarnings] = useState(EARNINGS_START);
+  const lastUpdateRef = useRef(Date.now());
+
+  useEffect(() => {
+    let rafId: number;
+
+    const update = () => {
+      const now = Date.now();
+      if (now - lastUpdateRef.current >= 1000) {
+        setEarnings((prev) => prev + Math.floor(Math.random() * 401) + 300);
+        lastUpdateRef.current = now;
+      }
+      rafId = requestAnimationFrame(update);
+    };
+
+    rafId = requestAnimationFrame(update);
+    return () => cancelAnimationFrame(rafId);
+  }, []);
+
+  const avatarUrls = getMarqueeTokens().map((token) => ({
+    imageUrl: token.feeEarnerAvatar,
+    profileUrl: `https://twitter.com/${token.feeEarnerUsername.replace(/^@/, "")}`,
+  }));
+
+  return (
+    <BentoCard className={className}>
+      <div className="flex h-full flex-col justify-between">
+        <div className="flex items-center gap-2">
+          <AvatarCircles
+            numPeople={avatarUrls.length}
+            avatarUrls={avatarUrls}
+            className="scale-90 sm:scale-100"
+          />
+        </div>
+        <div className="mt-3">
+          <p className="text-lg font-semibold text-white sm:text-3xl">
+            ${earnings.toLocaleString("en-US")}+
+          </p>
+          <p className="mt-1 text-[0.6rem] text-neutral-400">in creator earnings</p>
+        </div>
+      </div>
+    </BentoCard>
+  );
+});
+
+// X Feed - Load tweets lazily with IntersectionObserver
+const TweetEmbed = memo(function TweetEmbed({ tweetId }: { tweetId: string }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "100px" }
+    );
+
+    if (containerRef.current) observer.observe(containerRef.current);
+    return () => observer.disconnect();
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#050507] text-white">
-      {/* HEADER */}
-      <header className="border-b-2 border-white/5 bg-[#050507]">
-        <div className="mx-auto flex max-w-6xl items-center gap-5 px-5 py-4 md:px-7">
-          <div className="flex items-center">
-            <Image
-              src="/bags.png"
-              alt="Bags logo"
-              width={36}
-              height={36}
-              className="h-9 w-9"
-            />
-          </div>
-
-          <div className="flex-1">
-            <div className="flex items-center rounded-full bg-[#141414] px-5 py-2 shadow-[0_0_0_2px_rgba(255,255,255,0.07),0_0_0_1px_rgba(0,0,0,0.85)_inset,0_0_10px_rgba(0,0,0,0.5)_inset]">
-              <FiSearch className="mr-2.5 text-[17px] text-neutral-600" />
-              <input
-                type="text"
-                placeholder="Search by CA or ticker"
-                className="w-full bg-transparent text-[15px] text-neutral-200 placeholder:text-neutral-500 focus:outline-none"
-              />
-            </div>
-          </div>
-
-          <nav className="hidden items-center gap-5 text-sm md:flex">
-            <a
-              href="https://bags.fm/drops"
-              className="flex cursor-pointer items-center gap-1 text-[14px] text-neutral-300 transition-colors hover:text-white"
-            >
-              <span>[$100K challenge]</span>
-            </a>
-            <a
-              href="https://bags.fm/how-it-works"
-              className="cursor-pointer text-[14px] text-neutral-300 transition-colors hover:text-white"
-            >
-              <span>[how it works]</span>
-            </a>
-          </nav>
-
-          <div className="flex items-center gap-2.5">
-            <a
-              href="https://bags.fm/launch"
-              className="hidden transform cursor-pointer items-center justify-center rounded-full bg-[#02FF40] px-7 py-2.5 text-sm font-semibold text-black transition-transform duration-150 ease-in-out hover:scale-[1.02] md:inline-flex"
-            >
-              <FiPlus className="mr-2 text-[19px]" />
-              <span className="font-bold">create</span>
-            </a>
-            <a
-              href="https://bags.fm/login"
-              className="inline-flex cursor-pointer items-center justify-center rounded-full bg-white/100 px-7 py-2.5 text-sm font-bold text-black transition-colors duration-150 hover:bg-white/90"
-            >
-              <span>log in</span>
-            </a>
-          </div>
-        </div>
-      </header>
-
-      {/* HERO */}
-      <section className="relative flex items-center justify-center overflow-hidden px-6 py-32">
-        {/* HERO floor background (replaces DottedMap) */}
-        <div className="pointer-events-none absolute inset-0 z-0">
-          <DitherShader
-            src="floor.webp"
-            gridSize={3}
-            ditherMode="bayer"
-            colorMode="grayscale"
-            className="h-full w-full"
+    <div ref={containerRef} className="relative h-full w-80 flex-shrink-0">
+      <div className="absolute inset-0 overflow-hidden rounded-2xl">
+        {isVisible ? (
+          <iframe
+            src={`https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark&dnt=true`}
+            title={tweetId}
+            loading="lazy"
+            className="absolute -inset-1 h-[calc(100%+8px)] w-[calc(100%+8px)] border-0"
           />
-
-          {/* overall darken */}
-          <div className="absolute inset-0 bg-[#050507]/75" />
-
-          {/* flipped gradient (fade INTO bottom) */}
-          <div className="absolute inset-0 bg-linear-to-b from-transparent via-[#050507]/35 to-[#050507]" />
-        </div>
-
-        <div className="z-10 -mt-16 max-w-3xl text-center">
-          <div className="relative inline-flex items-center">
-            <div className="mb-5 inline-flex items-center rounded-full border border-white/10 bg-[rgba(0,0,0,0.9)] px-5 py-3 shadow-lg backdrop-blur-sm">
-              <span
-                ref={earningsSpanRef}
-                className="text-sm font-semibold tracking-[0.02em] text-white"
-              >
-                ${EARNINGS_START.toLocaleString("en-US")}+
-              </span>
-              <span className="ml-1 text-sm text-neutral-300">
-                in creator earnings
-              </span>
-            </div>
-
-            <div className="pointer-events-auto absolute -right-6 -top-6 hidden md:block">
-              <AvatarCircles
-                numPeople={MARQUEE_TOKENS.length}
-                avatarUrls={AVATAR_URLS}
-                className="scale-75"
-              />
-            </div>
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-white/5 text-neutral-500 text-xs">
+            Loading...
           </div>
+        )}
+      </div>
+    </div>
+  );
+});
 
-          <h1 className="text-4xl font-semibold leading-[0.9] tracking-tight text:white text-white md:text-[87px]">
-            We&apos;re funding
-            <br />
-            the future.
-          </h1>
+const XFeedBento = memo(function XFeedBento({ className }: { className?: string }) {
+  return (
+    <BentoCard className={className} noPaddingBottom>
+      <div className="flex h-full flex-col">
+        <div className="mb-1 flex flex-shrink-0 items-center justify-between gap-2">
+          <span className="text-[0.7rem] font-semibold uppercase tracking-wide text-neutral-300">
+            Recent posts
+          </span>
+        </div>
+        <div className="mb-1 h-px w-full flex-shrink-0 bg-white/10" />
+        <div className="mt-1 flex-1 min-h-0 pb-3">
+          <div className="flex h-full w-full gap-3 overflow-x-auto">
+            {TWEET_IDS.map((id) => (
+              <TweetEmbed key={id} tweetId={id} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </BentoCard>
+  );
+});
 
-          <p className="mt-4 text-sm text-neutral-400 md:text-base">
-            What are you building?
-          </p>
+// News Bento with visibility-based animation
+const NewsBento = memo(function NewsBento({ className }: { className?: string }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-          <motion.a
-            href="https://bags.fm/launch"
-            // EDITED: Added 3D shadow and click-down physics
-            className="group relative mt-8 inline-flex cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[#02FF40] px-10 py-3 text-base font-semibold text-black transition-all duration-150 ease-in-out md:text-lg shadow-[0_6px_0_#00cc33] hover:shadow-[0_8px_0_#00cc33] hover:-translate-y-[2px] active:shadow-none active:translate-y-[6px]"
-            {...shinyAnimationProps}
-            // Override the shiny animation scale tap to avoid conflict with CSS 3D translate
-            whileTap={{ scale: 0.98 }} 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+
+    if (containerRef.current) observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const id = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % NEWS_ITEMS.length);
+    }, 5000);
+
+    return () => clearInterval(id);
+  }, [isVisible]);
+
+  return (
+    <BentoCard className={className} noPaddingBottom>
+      <div ref={containerRef} className="flex h-full flex-col">
+        <div className="mb-2 flex flex-shrink-0 items-center justify-between gap-2">
+          <span className="text-[0.7rem] font-semibold uppercase tracking-wide text-neutral-300">
+            News
+          </span>
+          <a
+            href="https://x.com/BNNBags"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 text-[0.6rem] text-neutral-400 hover:text-white"
           >
-            <span
-              className="pointer-events-none absolute inset-0 rounded-full"
-              style={{
-                backgroundImage:
-                  "linear-gradient(-75deg, transparent calc(var(--x) + 20%), rgba(255,255,255,0.5) calc(var(--x) + 25%), transparent calc(var(--x) + 100%))",
-              }}
-            />
-            <FiPlus className="relative mr-2 text-3xl" />
-            <span className="relative font-bold">get funded</span>
-          </motion.a>
+            <span className="uppercase tracking-wide">powered by</span>
+            <div className="h-7 w-7 overflow-hidden rounded-lg border border-white/25 bg-white/5">
+              <Image src="/bnn.jpg" alt="BNN" width={28} height={28} className="h-full w-full object-cover" />
+            </div>
+          </a>
         </div>
-      </section>
-
-      {/* iPhone + floor + marquee + bento + Matrix stats + mobile card */}
-      <section className="relative -mt-16 flex flex-col items-center overflow-hidden px-6 pb-16">
-        {/* dithered floor */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-25 h-56 md:h-100">
-          <DitherShader
-            src="floor.webp"
-            gridSize={3}
-            ditherMode="bayer"
-            colorMode="grayscale"
-            className="h-full w-full"
-          />
-          <div className="absolute inset-0 bg-[#050507]/75" />
-          <div className="absolute inset-0 bg-linear-to-b from-[#050507] via-[#050507]/60 to-transparent" />
-        </div>
-
-        <p className="z-20 mb-4 text-xs tracking-wider text-neutral-700">
-          you are clicks away from this
-        </p>
-
-        {/* marquee behind iPhone */}
-        <div className="pointer-events-none invisible absolute inset-x-0 top-1/8 z-10 -translate-y-1/2 overflow-hidden blur-[0.5px] md:visible">
-          <FastMarquee gradient={false} speed={40} pauseOnHover={false}>
-            {Array.from({ length: 3 }).flatMap((_, loopIndex) =>
-              MARQUEE_TOKENS.map((token) => (
-                <MarqueeCard
-                  key={`${loopIndex}-${token.id}`}
-                  token={token}
-                  className="mr-4"
-                />
-              )),
-            )}
-          </FastMarquee>
-        </div>
-
-        {/* iPhone */}
-        <div className="relative z-30 w-[320px] md:w-[434px]">
+        <div className="mb-2 h-px w-full flex-shrink-0 bg-white/10" />
+        <div className="flex-1 min-h-0 overflow-hidden pb-3">
           <div
-            className="pointer-events-none absolute top-0 z-20 h-[70%] w-[75px]"
-            style={{
-              right: "97%",
-              background:
-                "linear-gradient(to left, rgba(5,5,7,1) 0%, rgba(5,5,7,0.7) 30%, rgba(5,5,7,0.4) 60%, rgba(5,5,7,0) 100%)",
-            }}
-          />
-          <div
-            className="pointer-events-none absolute top-0 z-20 h-[70%] w-[75px]"
-            style={{
-              left: "97%",
-              background:
-                "linear-gradient(to right, rgba(5,5,7,1) 0%, rgba(5,5,7,0.7) 30%, rgba(5,5,7,0.4) 60%, rgba(5,5,7,0) 100%)",
-            }}
-          />
-          <div className="z-30">
-            <Iphone src="flex3.png" />
+            className="flex h-full w-full transition-transform duration-500 ease-out"
+            style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+          >
+            {NEWS_ITEMS.map((item, idx) => (
+              <div key={idx} className="h-full w-full flex-shrink-0 px-1">
+                <div className="flex h-full flex-col justify-between px-4 py-3">
+                  <p className="flex-1 text-[0.95rem] leading-snug text-neutral-100 md:text-[1.15rem] md:leading-relaxed">
+                    {item}
+                  </p>
+                  <div className="mt-2 flex flex-shrink-0 items-center justify-end text-[1rem] text-neutral-500">
+                    <span>{idx + 1}/{NEWS_ITEMS.length}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
+      </div>
+    </BentoCard>
+  );
+});
 
-        {/* vertical marquee */}
-        <div className="relative z-30 mt-10 mb-8 hidden w-full max-w-5xl justify-center lg:flex">
-          <Marquee3D />
+// Marquee with lazy initialization
+const UpcomingRoadmapCard = memo(function UpcomingRoadmapCard({ className }: { className?: string }) {
+  const [tokens, setTokens] = useState<MarqueeToken[]>([]);
+
+  useEffect(() => {
+    // Lazy load tokens
+    setTokens(getMarqueeTokens());
+  }, []);
+
+  if (tokens.length === 0) {
+    return <BentoCard className={className} placeholder="Loading..." />;
+  }
+
+  return (
+    <BentoCard className={className}>
+      <div className="flex h-full flex-col">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <span className="text-[0.7rem] font-semibold uppercase tracking-wide text-neutral-300">
+            Pushing Limits
+          </span>
+          <span className="text-[0.6rem] text-neutral-500">leading the way</span>
         </div>
-
-        {/* bento grid */}
-        <div className="relative z-30 mb-32 w-full max-w-5xl hidden lg:block">
-          <BagsBento />
+        <div className="mb-2 h-px w-full bg-white/10" />
+        <div className="flex flex-1 items-center">
+          <div className="relative left-[-1rem] w-[calc(100%+2rem)]">
+            <FastMarquee gradient={false} speed={40} pauseOnHover>
+              {tokens.map((token) => (
+                <MarqueeCard key={token.id} token={token} className="mr-3" />
+              ))}
+            </FastMarquee>
+          </div>
         </div>
+      </div>
+    </BentoCard>
+  );
+});
 
-        {/* Bags Mobile card */}
-        <div className="relative z-30 w-full max-w-5xl">
-          <MagicCard className="mx-auto w-full">
-            <div className="flex w-full flex-col items-center justify-between gap-2 px-6 py-4 md:flex-row md:items-start md:gap-10 md:px-10 md:py-7 md:pb-8">
-              <div className="flex w-full items-center gap-4 md:flex-1 md:items-start md:gap-5">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-black/90 md:h-16 md:w-16">
-                  <Image
-                    src="/b.png"
-                    alt="Bags Mobile icon"
-                    width={48}
-                    height={48}
-                    className="h-10 w-10 md:h-11 md:w-11"
-                  />
-                </div>
+// Token Item - Memoized
+const TokenItem = memo(function TokenItem({ token }: { token: BagsToken }) {
+  const rawLinks = token.links ?? {};
+  const displayLinks = Object.entries(rawLinks).filter(
+    ([key, url]) =>
+      key.toLowerCase() !== "image" &&
+      typeof url === "string" &&
+      url.startsWith("http")
+  );
 
-                <div className="text-left">
-                  <p className="text-sm font-semibold text-white md:text-lg">
-                    Bags Mobile
-                  </p>
-                  <p className="text-xs text-neutral-300 md:hidden">
-                    Get funded for your future
-                  </p>
-                  <p className="hidden text-xs text-neutral-300 md:block md:text-sm lg:text-base">
-                    Get funded for your <RotatingWord />
-                  </p>
-                  <p className="mt-0.5 text-[11px] text-neutral-500 md:text-xs">
-                    Available on iOS and Android
-                  </p>
-                </div>
-              </div>
+  const prettyLabel = (key: string) => {
+    const k = key.toLowerCase();
+    if (k === "external_url" || k === "website") return "site";
+    if (k === "twitter" || k === "x") return "twitter";
+    if (k === "telegram") return "tg";
+    if (k === "discord") return "discord";
+    return key;
+  };
 
-              <div className="flex w-full justify-center md:w-auto md:justify-end">
-                <a
-                  href="https://apps.apple.com/us/app/bags-trade-crypto-memes/id6473196333"
-                  className="hidden lg:block"
-                >
-                  <Image
-                    src="/bags-ios-qr.png"
-                    alt="Scan to download Bags on iOS"
-                    width={120}
-                    height={120}
-                    className="rounded-md border border-white/10"
-                  />
-                </a>
-              </div>
-
-              <a
-                href="https://bags.fm/app-links"
-                className="mt-1 inline-flex shrink-0 items-center justify-center rounded-full bg-[#02FF40]/100 px-7 py-2.5 text-sm font-semibold text-black shadow-[0_0_25px_rgba(0,255,90,0.1)] transition-colors duration-150 hover:bg-[#02FF40]/90 lg:absolute lg:bottom-5 lg:left-6 lg:mt-0"
-              >
-                download now
-              </a>
+  return (
+    <li className="rounded-xl bg-white/5 px-3 py-2">
+      <div className="flex h-14 items-center gap-3">
+        <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-xl bg-black/40">
+          {token.image ? (
+            <img src={token.image} alt={token.name} className="h-full w-full object-cover" loading="lazy" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-[0.7rem] text-neutral-300">
+              {token.symbol?.slice(0, 3) || "BAG"}
             </div>
-          </MagicCard>
+          )}
         </div>
-      </section>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <span className="truncate text-[0.9rem] text-white">{token.name}</span>
+          <span className="text-[0.7rem] text-neutral-400">
+            {token.symbol
+              ? `${token.symbol} · ${token.mint.slice(0, 4)}…${token.mint.slice(-4)}`
+              : token.mint.slice(0, 6) + "…" + token.mint.slice(-4)}
+          </span>
+        </div>
+        <a
+          href={`https://bags.fm/${token.mint}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-1 flex h-8 w-8 flex-shrink-0 items-center justify-center text-[1rem] text-neutral-400 hover:text-white"
+        >
+          <FiGlobe className="h-6 w-6" />
+        </a>
+      </div>
+      {displayLinks.length > 0 && (
+        <div className="mt-1 flex flex-wrap gap-1.5 pl-12">
+          {displayLinks.slice(0, 4).map(([key, url]) => (
+            <a
+              key={key}
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full border border-white/15 bg-black/30 px-2 py-[2px] text-[0.6rem] text-neutral-100 hover:bg-white/10 hover:text-white"
+            >
+              {prettyLabel(key)}
+            </a>
+          ))}
+        </div>
+      )}
+    </li>
+  );
+});
+
+// Bags Tokens with better fetch handling
+const BagsTokensCard = memo(function BagsTokensCard({ className }: { className?: string }) {
+  const [tokens, setTokens] = useState<BagsToken[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    const fetchTokens = async () => {
+      // Abort previous request if still pending
+      abortControllerRef.current?.abort();
+      abortControllerRef.current = new AbortController();
+
+      try {
+        const res = await fetch("/api/bags/new-tokens", {
+          method: "GET",
+          cache: "no-store",
+          signal: abortControllerRef.current.signal,
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const json = await res.json();
+        setTokens(json.tokens ?? []);
+        setError(null);
+      } catch (err: any) {
+        if (err.name !== "AbortError") {
+          setError(err?.message ?? "Failed to load");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTokens();
+    const id = setInterval(fetchTokens, 60_000);
+
+    return () => {
+      clearInterval(id);
+      abortControllerRef.current?.abort();
+    };
+  }, []);
+
+  return (
+    <BentoCard className={className} noPaddingBottom>
+      <div className="flex h-full flex-col">
+        <div className="mb-2 flex flex-shrink-0 items-center justify-between gap-2">
+          <span className="text-[0.7rem] font-semibold uppercase tracking-wide text-neutral-300">
+            New Coins
+          </span>
+          <span className="text-[0.6rem] text-neutral-500">
+            {loading ? "syncing…" : "updates every minute"}
+          </span>
+        </div>
+        <div className="mb-2 h-px w-full flex-shrink-0 bg-white/10" />
+
+        {error && <p className="mb-2 flex-shrink-0 text-[0.65rem] text-red-400">{error}</p>}
+
+        {!error && loading && (
+          <ul className="flex-1 min-h-0 space-y-3 overflow-y-auto pb-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <li key={i} className="rounded-xl bg-white/5 px-3 py-2">
+                <div className="flex h-14 items-center gap-3">
+                  <div className="h-10 w-10 flex-shrink-0 animate-pulse rounded-xl bg-white/10" />
+                  <div className="flex min-w-0 flex-1 flex-col space-y-2">
+                    <div className="h-3 w-3/4 animate-pulse rounded bg-white/10" />
+                    <div className="h-3 w-1/2 animate-pulse rounded bg-white/5" />
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {!loading && !error && tokens.length === 0 && (
+          <p className="mt-2 text-[0.65rem] text-neutral-400">No tokens right now.</p>
+        )}
+
+        {!loading && !error && tokens.length > 0 && (
+          <ul className="flex-1 min-h-0 space-y-3 overflow-y-auto pb-3">
+            {tokens.map((t) => (
+              <TokenItem key={t.mint} token={t} />
+            ))}
+          </ul>
+        )}
+      </div>
+    </BentoCard>
+  );
+});
+
+// ============ MAIN COMPONENT ============
+
+export default function Home() {
+  return (
+    <main className="relative h-screen w-screen overflow-hidden bg-black text-white">
+      <VideoBackground />
+
+      <div className="relative z-10 flex h-full w-full items-center justify-center px-4 py-6">
+        <div className="relative h-full w-full">
+          {/* Bento grid – only on lg+ */}
+          <div className="hidden h-full w-full grid-cols-6 grid-rows-4 gap-4 lg:grid">
+            <AudioBento className="col-start-1 col-span-2 row-start-1" />
+            <EarningsBento className="col-start-3 col-span-1 row-start-1" />
+            <XFeedBento className="col-start-4 col-span-3 row-start-1 overflow-x-hidden" />
+            <BentoCard className="col-start-1 row-start-2 row-span-2" placeholder="[ create ]" />
+            <BentoCard className="col-start-2 row-start-2" placeholder="[ connect ]" />
+            <BentoCard className="col-start-2 row-start-3" placeholder="[ trade ]" />
+            <BagsTokensCard className="col-start-5 col-span-2 row-start-2 row-span-2" />
+            <NewsBento className="col-start-1 col-span-3 row-start-4" />
+            <UpcomingRoadmapCard className="col-start-4 col-span-3 row-start-4" />
+          </div>
+
+          {/* Center hero overlay */}
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3 text-center">
+            <Image src="/bags.png" alt="Bags logo" width={64} height={64} className="h-12 w-12 md:h-14 md:w-14" priority />
+
+            <div className="relative inline-block">
+              <h1 className="whitespace-nowrap text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-semibold tracking-tight">
+                <span>Fund Better.</span>
+                <span className="absolute top-0 md:top-0 -right-2 md:-right-2 text-base md:text-2xl leading-none">™</span>
+              </h1>
+            </div>
+
+            <p className="-mt-3 text-xs sm:text-sm md:text-base text-neutral-200">
+              Raise money from the internet
+            </p>
+
+            <div className="pointer-events-auto mt-3">
+              <ShinyButton />
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   );
 }
