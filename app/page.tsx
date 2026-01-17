@@ -13,9 +13,8 @@ import { AvatarCircles } from "./components/Avatar";
 import { cn } from "@/lib/utils";
 import { Marqueee } from "./components/Marq";
 import { MagicCard } from "./components/MagicCard";
+import DitherShader from "./components/dither-shader";
 import { BagsBento } from "./components/BagsBento";
-// DitherShader no longer used:
-// import DitherShader from "./components/dither-shader";
 
 // ElevenLabs Matrix + presets (your local implementation using useId)
 import { Matrix, digits, wave } from "./components/Matrix";
@@ -292,18 +291,19 @@ export default function Home() {
 
       {/* HERO */}
       <section className="relative flex items-center justify-center overflow-hidden px-6 py-32">
-        {/* HERO background video (wall.mp4) */}
-        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-          <video
-            className="h-full w-full object-cover scale-[1.1]" // zoom ~10%
-            src="/wall.mp4"
-            autoPlay
-            loop
-            muted
-            playsInline
+        {/* HERO floor background (replaces DottedMap) */}
+        <div className="pointer-events-none absolute inset-0 z-0">
+          <DitherShader
+            src="floor.webp"
+            gridSize={3}
+            ditherMode="bayer"
+            colorMode="grayscale"
+            className="h-full w-full"
           />
+
           {/* overall darken */}
           <div className="absolute inset-0 bg-[#050507]/75" />
+
           {/* flipped gradient (fade INTO bottom) */}
           <div className="absolute inset-0 bg-linear-to-b from-transparent via-[#050507]/35 to-[#050507]" />
         </div>
@@ -343,9 +343,11 @@ export default function Home() {
 
           <motion.a
             href="https://bags.fm/launch"
+            // EDITED: Added 3D shadow and click-down physics
             className="group relative mt-8 inline-flex cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[#02FF40] px-10 py-3 text-base font-semibold text-black transition-all duration-150 ease-in-out md:text-lg shadow-[0_6px_0_#00cc33] hover:shadow-[0_8px_0_#00cc33] hover:-translate-y-[2px] active:shadow-none active:translate-y-[6px]"
             {...shinyAnimationProps}
-            whileTap={{ scale: 0.98 }} // avoid conflict with CSS translate
+            // Override the shiny animation scale tap to avoid conflict with CSS 3D translate
+            whileTap={{ scale: 0.98 }}
           >
             <span
               className="pointer-events-none absolute inset-0 rounded-full"
@@ -362,18 +364,18 @@ export default function Home() {
 
       {/* iPhone + floor + marquee + bento + Matrix stats + mobile card */}
       <section className="relative -mt-16 flex flex-col items-center overflow-hidden px-6 pb-16">
-        {/* video floor (wall.mp4) */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-25 h-56 md:h-100 overflow-hidden">
+        {/* video floor (wall.mp4 instead of dithered floor.webp) */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-25 h-56 md:h-100">
           <video
-            className="h-full w-full object-cover scale-[1.1]" // zoom ~10%
+            className="h-full w-full object-cover"
             src="/wall.mp4"
             autoPlay
             loop
             muted
             playsInline
           />
-          <div className="absolute inset-0 bg-[#050507]/55" />
-          <div className="absolute inset-0 bg-linear-to-b from-[#050507] via-[#050507]/40 to-transparent" />
+          <div className="absolute inset-0 bg-[#050507]/75" />
+          <div className="absolute inset-0 bg-linear-to-b from-[#050507] via-[#050507]/60 to-transparent" />
         </div>
 
         <p className="z-20 mb-4 text-xs tracking-wider text-neutral-700">
