@@ -153,7 +153,7 @@ const ReviewCard = ({
 }) => (
   <figure
     className={cn(
-      "relative h-full w-fit cursor-pointer overflow-hidden rounded-xl border p-4 sm:w-36",
+      "relative h-full w-fit cursor-pointer overflow-hidden rounded-xl border p-4 sm:w-36 md:w-48",
       "border-gray-950/[.1] bg-gray-950/[.01] hover:bg-gray-950/[.05]",
       "dark:border-gray-50/[.1] dark:bg-gray-50/[.10] dark:hover:bg-gray-50/[.15]",
     )}
@@ -173,7 +173,7 @@ const ReviewCard = ({
 
 export function Marquee3D() {
   return (
-    <div className="relative flex h-96 w-[75%] flex-row items-center justify-center gap-4 overflow-hidden md:my-32">
+    <div className="relative flex h-96 w-[80%] flex-row items-center justify-center gap-4 overflow-hidden md:my-32">
       <Marqueee pauseOnHover vertical className="w-1/4 [--duration:20s]">
         {reviews.map((review) => (
           <ReviewCard key={`col1-${review.username}`} {...review} />
@@ -347,7 +347,7 @@ export default function Home() {
             className="group relative mt-8 inline-flex cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[#02FF40] px-10 py-3 text-base font-semibold text-black transition-all duration-150 ease-in-out md:text-lg shadow-[0_6px_0_#00cc33] hover:shadow-[0_8px_0_#00cc33] hover:-translate-y-[2px] active:shadow-none active:translate-y-[6px]"
             {...shinyAnimationProps}
             // Override the shiny animation scale tap to avoid conflict with CSS 3D translate
-            whileTap={{ scale: 0.98 }}
+            whileTap={{ scale: 0.98 }} 
           >
             <span
               className="pointer-events-none absolute inset-0 rounded-full"
@@ -364,15 +364,14 @@ export default function Home() {
 
       {/* iPhone + floor + marquee + bento + Matrix stats + mobile card */}
       <section className="relative -mt-16 flex flex-col items-center overflow-hidden px-6 pb-16">
-        {/* video floor (wall.mp4 instead of dithered floor.webp) */}
+        {/* dithered floor */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-25 h-56 md:h-100">
-          <video
-            className="h-full w-full object-cover"
-            src="/wall.mp4"
-            autoPlay
-            loop
-            muted
-            playsInline
+          <DitherShader
+            src="floor.webp"
+            gridSize={3}
+            ditherMode="bayer"
+            colorMode="grayscale"
+            className="h-full w-full"
           />
           <div className="absolute inset-0 bg-[#050507]/75" />
           <div className="absolute inset-0 bg-linear-to-b from-[#050507] via-[#050507]/60 to-transparent" />
@@ -383,7 +382,7 @@ export default function Home() {
         </p>
 
         {/* marquee behind iPhone */}
-        <div className="pointer-events-none invisible absolute inset-x-0 top-1/8 z-10 -translate-y-1/2 overflow-hidden blur-[0.5px] md:visible">
+        <div className="pointer-events-none invisible absolute inset-x-0 top-1/6 z-10 -translate-y-1/2 overflow-hidden blur-[0.5px] md:visible">
           <FastMarquee gradient={false} speed={40} pauseOnHover={false}>
             {Array.from({ length: 3 }).flatMap((_, loopIndex) =>
               MARQUEE_TOKENS.map((token) => (
@@ -425,13 +424,8 @@ export default function Home() {
           <Marquee3D />
         </div>
 
-        {/* bento grid */}
-        <div className="relative z-30 mb-32 w-full max-w-5xl hidden lg:block">
-          <BagsBento />
-        </div>
-
         {/* Bags Mobile card */}
-        <div className="relative z-30 w-full max-w-5xl">
+        <div className="mt-36 lg:mt-0 relative z-30 w-full max-w-5xl">
           <MagicCard className="mx-auto w-full">
             <div className="flex w-full flex-col items-center justify-between gap-2 px-6 py-4 md:flex-row md:items-start md:gap-10 md:px-10 md:py-7 md:pb-8">
               <div className="flex w-full items-center gap-4 md:flex-1 md:items-start md:gap-5">
